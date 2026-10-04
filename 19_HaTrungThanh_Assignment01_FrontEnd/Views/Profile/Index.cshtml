@@ -1,0 +1,69 @@
+@model AccountViewModel
+@{
+    ViewData["Title"] = "Hồ Sơ Cá Nhân";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card card-clean">
+            <div class="card-header bg-white py-3 border-bottom">
+                <h4 class="fw-bold mb-0">Hồ Sơ Cá Nhân</h4>
+                <small class="text-muted">Quản lý và cập nhật thông tin tài khoản nhân viên của bạn</small>
+            </div>
+
+            <div class="card-body p-4">
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible fade show py-2 small d-flex align-items-center mb-3" role="alert">
+                        <i class="bi bi-check-circle me-2"></i>
+                        <div>@TempData["SuccessMessage"]</div>
+                        <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Đóng"></button>
+                    </div>
+                }
+
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show py-2 small d-flex align-items-center mb-3" role="alert">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        <div>@TempData["ErrorMessage"]</div>
+                        <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Đóng"></button>
+                    </div>
+                }
+
+                <form method="post" asp-controller="Profile" asp-action="Update">
+                    @Html.AntiForgeryToken()
+                    
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Mã Tài Khoản</label>
+                        <input type="text" class="form-control bg-light font-monospace" value="@Model?.AccountID" readonly />
+                        <small class="text-muted">Mã định danh hệ thống (chỉ xem)</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Họ và Tên</label>
+                        <input type="text" name="AccountName" value="@Model?.AccountName" class="form-control" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Địa Chỉ Email</label>
+                        <input type="email" name="AccountEmail" value="@Model?.AccountEmail" class="form-control" required />
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label small fw-semibold">Mật Khẩu</label>
+                        <input type="password" name="AccountPassword" value="@Model?.AccountPassword" class="form-control" required />
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 pt-3 border-top">
+                        <a asp-controller="NewsArticle" asp-action="Index" class="btn btn-outline-secondary btn-sm">
+                            Hủy bỏ
+                        </a>
+                        <button type="submit" class="btn btn-primary btn-sm">
+                            <i class="bi bi-check-lg me-1"></i> Lưu Thay Đổi
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,2 @@
+global using _19_HaTrungThanh_Assignment01_FrontEnd.Models;
+global using _19_HaTrungThanh_Assignment01_FrontEnd.Services;

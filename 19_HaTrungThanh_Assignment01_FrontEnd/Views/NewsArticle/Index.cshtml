@@ -1,0 +1,302 @@
+@model List<NewsArticleViewModel>
+@{
+    ViewData["Title"] = "Quản Lý Bài Viết";
+    var categories = ViewBag.Categories as List<CategoryViewModel> ?? new List<CategoryViewModel>();
+    var tags = ViewBag.Tags as List<TagViewModel> ?? new List<TagViewModel>();
+}
+
+<!-- Page Header -->
+<div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+    <div>
+        <h3 class="fw-bold mb-1">Quản Lý Bài Viết</h3>
+        <p class="text-muted mb-0 small">Khu vực dành cho Nhân viên (Staff) quản lý tin tức và các thẻ tag</p>
+    </div>
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createArticleModal">
+        <i class="bi bi-file-earmark-plus me-1"></i> Thêm Bài Viết
+    </button>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show py-2 small d-flex align-items-center mb-3" role="alert">
+        <i class="bi bi-check-circle me-2"></i>
+        <div>@TempData["SuccessMessage"]</div>
+        <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Đóng"></button>
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show py-2 small d-flex align-items-center mb-3" role="alert">
+        <i class="bi bi-exclamation-triangle me-2"></i>
+        <div>@TempData["ErrorMessage"]</div>
+        <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Đóng"></button>
+    </div>
+}
+
+<!-- Search Bar -->
+<div class="card card-clean p-3 mb-4">
+    <form method="get" asp-controller="NewsArticle" asp-action="Index" class="row g-2 align-items-center">
+        <div class="col-md-9">
+            <input type="text" name="keyword" value="@ViewBag.Keyword" class="form-control" placeholder="Tìm kiếm theo tiêu đề, tóm tắt hoặc nội dung..." />
+        </div>
+        <div class="col-md-3 d-flex gap-2">
+            <button type="submit" class="btn btn-primary flex-grow-1">
+                <i class="bi bi-search me-1"></i> Tìm kiếm
+            </button>
+            @if (!string.IsNullOrEmpty(ViewBag.Keyword as string))
+            {
+                <a asp-controller="NewsArticle" asp-action="Index" class="btn btn-outline-secondary">Đặt lại</a>
+            }
+        </div>
+    </form>
+</div>
+
+<!-- Table -->
+<div class="card card-clean">
+    <div class="table-responsive">
+        <table class="table table-clean table-hover align-middle">
+            <thead>
+                <tr>
+                    <th style="width: 80px;">Mã</th>
+                    <th>Tiêu Đề & Tóm Tắt</th>
+                    <th>Chuyên Mục</th>
+                    <th>Thẻ (Tags)</th>
+                    <th>Tác Giả</th>
+                    <th>Trạng Thái</th>
+                    <th class="text-end" style="width: 160px;">Thao Tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model == null || !Model.Any())
+                {
+                    <tr>
+                        <td colspan="7" class="text-center py-4 text-muted">
+                            Không tìm thấy bài viết nào.
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var article in Model)
+                    {
+                        var articleTagIds = article.NewsTags?.Select(nt => nt.TagID).ToList() ?? new List<int>();
+                        <tr>
+                            <td class="fw-bold text-muted">#@article.NewsArticleID</td>
+                            <td style="max-width: 280px;">
+                                <div class="fw-semibold text-truncate">@article.NewsTitle</div>
+                                <div class="text-muted small text-truncate">@article.Headline</div>
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-dark border">
+                                    @(article.Category?.CategoryName ?? "Tổng hợp")
+                                </span>
+                            </td>
+                            <td style="max-width: 180px;">
+                                @if (article.NewsTags != null && article.NewsTags.Any())
+                                {
+                                    <div class="d-flex flex-wrap gap-1">
+                                        @foreach (var nt in article.NewsTags)
+                                        {
+                                            <span class="badge bg-secondary-subtle text-secondary small">#@nt.Tag?.TagName</span>
+                                        }
+                                    </div>
+                                }
+                                else
+                                {
+                                    <span class="text-muted small">-</span>
+                                }
+                            </td>
+                            <td class="small text-muted">
+                                @(article.CreatedBy?.AccountName ?? "N/A")
+                            </td>
+                            <td>
+                                @if (article.NewsStatus == true)
+                                {
+                                    <span class="badge bg-success">Hoạt động</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">Bản nháp</span>
+                                }
+                            </td>
+                            <td class="text-end">
+                                <button type="button" class="btn btn-sm btn-outline-primary me-1"
+                                        data-bs-toggle="modal" data-bs-target="#editModal_@article.NewsArticleID">
+                                    <i class="bi bi-pencil"></i> Sửa
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-danger"
+                                        onclick="confirmDelete('@article.NewsArticleID', '@article.NewsTitle')">
+                                    <i class="bi bi-trash"></i> Xóa
+                                </button>
+                                <form id="deleteForm_@article.NewsArticleID" method="post" asp-controller="NewsArticle" asp-action="Delete" asp-route-id="@article.NewsArticleID" class="d-none">
+                                    @Html.AntiForgeryToken()
+                                </form>
+                            </td>
+                        </tr>
+
+                        <!-- Edit Modal -->
+                        <div class="modal fade" id="editModal_@article.NewsArticleID" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+                                <form class="modal-content" method="post" asp-controller="NewsArticle" asp-action="Edit" asp-route-id="@article.NewsArticleID">
+                                    @Html.AntiForgeryToken()
+                                    <div class="modal-header">
+                                        <h5 class="modal-title fw-bold">Chỉnh Sửa Bài Viết #@article.NewsArticleID</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="mb-3">
+                                            <label class="form-label small fw-semibold">Tiêu Đề Bài Viết <span class="text-danger">*</span></label>
+                                            <input type="text" name="NewsTitle" value="@article.NewsTitle" class="form-control" required />
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label small fw-semibold">Tóm Tắt (Headline) <span class="text-danger">*</span></label>
+                                            <input type="text" name="Headline" value="@article.Headline" class="form-control" required />
+                                        </div>
+                                        <div class="row g-2 mb-3">
+                                            <div class="col-md-6">
+                                                <label class="form-label small fw-semibold">Chuyên Mục <span class="text-danger">*</span></label>
+                                                <select name="CategoryID" class="form-select" required>
+                                                    @foreach (var cat in categories)
+                                                    {
+                                                        <option value="@cat.CategoryID" selected="@(article.CategoryID == cat.CategoryID)">@cat.CategoryName</option>
+                                                    }
+                                                </select>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label small fw-semibold">Nguồn Tin</label>
+                                                <input type="text" name="NewsSource" value="@article.NewsSource" class="form-control" />
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label small fw-semibold">Gắn Thẻ (Tags)</label>
+                                            <div class="p-2 border rounded bg-light">
+                                                @foreach (var tag in tags)
+                                                {
+                                                    bool isChecked = articleTagIds.Contains(tag.TagID);
+                                                    <div class="form-check form-check-inline me-3">
+                                                        <input class="form-check-input" type="checkbox" name="SelectedTagIds" value="@tag.TagID" id="tag_edit_@(article.NewsArticleID)_@(tag.TagID)" @(isChecked ? "checked" : "") />
+                                                        <label class="form-check-label small" for="tag_edit_@(article.NewsArticleID)_@(tag.TagID)">#@tag.TagName</label>
+                                                    </div>
+                                                }
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label small fw-semibold">Nội Dung Bài Viết <span class="text-danger">*</span></label>
+                                            <textarea name="NewsContent" class="form-control" rows="4" required>@article.NewsContent</textarea>
+                                        </div>
+                                        <div class="form-check">
+                                            <input type="checkbox" name="NewsStatus" value="true" class="form-check-input" id="statusCheck_@article.NewsArticleID" @(article.NewsStatus == true ? "checked" : "") />
+                                            <label class="form-check-label small" for="statusCheck_@article.NewsArticleID">Kích hoạt (Công khai bài viết)</label>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Hủy bỏ</button>
+                                        <button type="submit" class="btn btn-primary btn-sm px-3">Lưu Thay Đổi</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Create Modal (Clean & Simple) -->
+<div class="modal fade" id="createArticleModal" tabindex="-1" aria-labelledby="createArticleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <form class="modal-content" method="post" asp-controller="NewsArticle" asp-action="Create">
+            @Html.AntiForgeryToken()
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold" id="createArticleModalLabel">
+                    <i class="bi bi-file-earmark-plus text-primary me-2"></i>Thêm Bài Viết Mới
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-2 mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label small fw-semibold">Mã Bài Viết (ID)</label>
+                        <input type="text" name="NewsArticleID" class="form-control" placeholder="Để trống tự sinh mã" maxlength="20" />
+                    </div>
+                    <div class="col-md-8">
+                        <label class="form-label small fw-semibold">Tiêu Đề Bài Viết <span class="text-danger">*</span></label>
+                        <input type="text" name="NewsTitle" class="form-control" placeholder="Nhập tiêu đề bài viết" required />
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label small fw-semibold">Tóm Tắt (Headline) <span class="text-danger">*</span></label>
+                    <input type="text" name="Headline" class="form-control" placeholder="Nhập tóm tắt ngắn gọn bài viết" required />
+                </div>
+
+                <div class="row g-2 mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label small fw-semibold">Chuyên Mục <span class="text-danger">*</span></label>
+                        <select name="CategoryID" class="form-select" required>
+                            <option value="">-- Chọn chuyên mục --</option>
+                            @foreach (var cat in categories)
+                            {
+                                <option value="@cat.CategoryID">@cat.CategoryName</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-semibold">Nguồn Tin</label>
+                        <input type="text" name="NewsSource" class="form-control" placeholder="Ví dụ: Ban biên tập, Internet..." value="Nội bộ FU" />
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label small fw-semibold">Gắn Thẻ (Tags)</label>
+                    <div class="p-2 border rounded bg-light">
+                        @foreach (var tag in tags)
+                        {
+                            <div class="form-check form-check-inline me-3">
+                                <input class="form-check-input" type="checkbox" name="SelectedTagIds" value="@tag.TagID" id="create_tag_@tag.TagID" />
+                                <label class="form-check-label small" for="create_tag_@tag.TagID">#@tag.TagName</label>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label small fw-semibold">Nội Dung Bài Viết <span class="text-danger">*</span></label>
+                    <textarea name="NewsContent" class="form-control" rows="4" placeholder="Nhập nội dung chi tiết bài viết..." required></textarea>
+                </div>
+
+                <div class="form-check">
+                    <input type="checkbox" name="NewsStatus" value="true" class="form-check-input" checked id="createStatusCheck" />
+                    <label class="form-check-label small" for="createStatusCheck">Kích hoạt (Công khai bài viết ngay)</label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Hủy bỏ</button>
+                <button type="submit" class="btn btn-primary btn-sm px-3">Tạo Bài Viết</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function confirmDelete(id, title) {
+            Swal.fire({
+                title: 'Xác nhận xóa bài viết?',
+                html: `Bạn có chắc muốn xóa bài viết <strong>${title}</strong> (#${id})?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Đồng ý xóa',
+                cancelButtonText: 'Hủy bỏ'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('deleteForm_' + id).submit();
+                }
+            });
+        }
+    </script>
+}

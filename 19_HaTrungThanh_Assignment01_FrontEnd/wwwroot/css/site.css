@@ -1,0 +1,170 @@
+/* Clean, Minimalist Styling for PRN232 Assignment 01 */
+
+:root {
+  --primary-color: #0d6efd;
+  --primary-hover: #0b5ed7;
+  --bg-light: #f8f9fa;
+  --text-dark: #212529;
+  --border-color: #dee2e6;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background-color: #f4f6f9;
+  color: var(--text-dark);
+  min-height: 100vh;
+}
+
+/* Navbar */
+.navbar-custom {
+  background-color: #1e293b !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  padding: 0.75rem 0;
+}
+
+.navbar-brand {
+  font-weight: 700;
+  font-size: 1.15rem;
+  color: #fff !important;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.nav-link {
+  font-weight: 500;
+  color: #cbd5e1 !important;
+  padding: 0.5rem 0.85rem !important;
+  border-radius: 4px;
+  transition: all 0.15s ease-in-out;
+}
+
+.nav-link:hover, .nav-link.active {
+  color: #ffffff !important;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Card Minimal */
+.card-clean {
+  background: #ffffff;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+/* Table Minimal */
+.table-clean {
+  margin-bottom: 0;
+}
+
+.table-clean thead th {
+  background-color: #f8fafc;
+  color: #475569;
+  font-weight: 600;
+  font-size: 0.875rem;
+  border-bottom: 2px solid var(--border-color);
+  padding: 0.75rem 1rem;
+  white-space: nowrap;
+}
+
+.table-clean tbody td {
+  padding: 0.75rem 1rem;
+  vertical-align: middle;
+  border-bottom: 1px solid #edf2f7;
+  font-size: 0.9rem;
+}
+
+.table-clean tbody tr:hover {
+  background-color: #f8fafc;
+}
+
+/* News Cards (Home View) */
+.news-item-card {
+  background: #fff;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  transition: border-color 0.15s ease-in-out;
+}
+
+.news-item-card:hover {
+  border-color: #94a3b8;
+}
+
+.news-item-body {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.news-item-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 0.5rem;
+  line-height: 1.4;
+}
+
+.news-item-headline {
+  color: #64748b;
+  font-size: 0.9rem;
+  margin-bottom: 0.75rem;
+}
+
+.news-item-preview {
+  color: #475569;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  margin-bottom: 1rem;
+  flex-grow: 1;
+}
+
+/* Modal styling */
+.modal-header {
+  border-bottom: 1px solid var(--border-color);
+  padding: 1rem 1.25rem;
+  background-color: #f8fafc;
+}
+
+.modal-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.modal-footer {
+  border-top: 1px solid var(--border-color);
+  padding: 0.75rem 1.25rem;
+  background-color: #f8fafc;
+}
+
+/* Footer */
+.footer-clean {
+  background-color: #ffffff;
+  border-top: 1px solid var(--border-color);
+  padding: 1rem 0;
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+/* Scrollable Modal Form Fix */
+.modal-dialog-scrollable .modal-content,
+.modal-dialog-scrollable form.modal-content {
+  max-height: calc(100vh - 3.5rem);
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-dialog-scrollable .modal-body,
+.modal-dialog-scrollable form.modal-content .modal-body {
+  overflow-y: auto;
+  max-height: calc(100vh - 12rem);
+}
+
+.modal-dialog-scrollable .modal-footer,
+.modal-dialog-scrollable form.modal-content .modal-footer {
+  flex-shrink: 0;
+}

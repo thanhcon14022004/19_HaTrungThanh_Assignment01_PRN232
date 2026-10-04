@@ -1,0 +1,124 @@
+@model List<NewsArticleViewModel>
+@{
+    ViewData["Title"] = "Trang Chủ - Tin Tức";
+    var activeCount = Model?.Count ?? 0;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+    <div>
+        <h3 class="fw-bold mb-1">Tin Tức Công Khai</h3>
+        <p class="text-muted mb-0 small">Các bài viết đã được phát hành dành cho sinh viên và giảng viên</p>
+    </div>
+    <span class="badge bg-secondary">@activeCount bài viết</span>
+</div>
+
+<!-- Search Bar -->
+<div class="card card-clean p-3 mb-4">
+    <form method="get" asp-controller="Home" asp-action="Index" class="row g-2 align-items-center">
+        <div class="col-md-9">
+            <input type="text" name="keyword" value="@ViewBag.Keyword" class="form-control" placeholder="Tìm kiếm theo tiêu đề, tóm tắt hoặc nội dung..." />
+        </div>
+        <div class="col-md-3 d-flex gap-2">
+            <button type="submit" class="btn btn-primary flex-grow-1">
+                <i class="bi bi-search me-1"></i> Tìm kiếm
+            </button>
+            @if (!string.IsNullOrEmpty(ViewBag.Keyword as string))
+            {
+                <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary">Đặt lại</a>
+            }
+        </div>
+    </form>
+</div>
+
+@if (Model == null || !Model.Any())
+{
+    <div class="card card-clean text-center py-5">
+        <div class="text-muted">
+            <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+            Không có bài viết nào phù hợp với tìm kiếm của bạn.
+        </div>
+    </div>
+}
+else
+{
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+        @foreach (var article in Model)
+        {
+            <div class="col">
+                <div class="news-item-card">
+                    <div class="news-item-body">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="badge bg-light text-dark border">
+                                @(article.Category?.CategoryName ?? "Tổng hợp")
+                            </span>
+                            <small class="text-muted">
+                                @article.CreatedDate?.ToString("dd/MM/yyyy")
+                            </small>
+                        </div>
+
+                        <h5 class="news-item-title">@article.NewsTitle</h5>
+                        <p class="news-item-headline">@article.Headline</p>
+                        
+                        <p class="news-item-preview">
+                            @{
+                                var preview = article.NewsContent ?? "";
+                                if (preview.Length > 120) preview = preview.Substring(0, 120) + "...";
+                            }
+                            @preview
+                        </p>
+
+                        <div class="d-flex justify-content-between align-items-center pt-2 border-top mt-auto">
+                            <small class="text-muted">
+                                <i class="bi bi-person me-1"></i>@(article.CreatedBy?.AccountName ?? "Tác giả")
+                            </small>
+                            <button type="button" class="btn btn-sm btn-outline-primary"
+                                    data-bs-toggle="modal" data-bs-target="#readModal_@article.NewsArticleID">
+                                Chi tiết &rarr;
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal xem chi tiết bài viết -->
+            <div class="modal fade" id="readModal_@article.NewsArticleID" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <div>
+                                <span class="badge bg-primary me-2">@(article.Category?.CategoryName ?? "Chuyên mục")</span>
+                                <h5 class="modal-title d-inline-block">@article.NewsTitle</h5>
+                            </div>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="text-muted small mb-3 pb-2 border-bottom d-flex justify-content-between">
+                                <span>Tác giả: <strong>@(article.CreatedBy?.AccountName ?? "N/A")</strong></span>
+                                <span>Ngày đăng: <strong>@article.CreatedDate?.ToString("dd/MM/yyyy HH:mm")</strong></span>
+                            </div>
+                            <div class="fw-bold mb-3 text-secondary">
+                                @article.Headline
+                            </div>
+                            <div style="white-space: pre-line; line-height: 1.7;">
+                                @article.NewsContent
+                            </div>
+                            @if (article.NewsTags != null && article.NewsTags.Any())
+                            {
+                                <div class="mt-4 pt-3 border-top">
+                                    <small class="text-muted me-2">Thẻ tag:</small>
+                                    @foreach (var nt in article.NewsTags)
+                                    {
+                                        <span class="badge bg-light text-dark border me-1">#@nt.Tag?.TagName</span>
+                                    }
+                                </div>
+                            }
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Đóng</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

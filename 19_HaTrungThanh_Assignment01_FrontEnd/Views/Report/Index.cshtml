@@ -1,0 +1,147 @@
+@model ReportViewModel
+@{
+    ViewData["Title"] = "Báo Cáo Thống Kê";
+    var startVal = ViewBag.StartDate != null ? ((DateTime)ViewBag.StartDate).ToString("yyyy-MM-dd") : "";
+    var endVal = ViewBag.EndDate != null ? ((DateTime)ViewBag.EndDate).ToString("yyyy-MM-dd") : "";
+}
+
+<!-- Page Header -->
+<div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+    <div>
+        <h3 class="fw-bold mb-1">Báo Cáo Thống Kê Tin Tức</h3>
+        <p class="text-muted mb-0 small">Thống kê bài viết theo khoảng thời gian, sắp xếp giảm dần theo ngày tạo</p>
+    </div>
+    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="window.print()">
+        <i class="bi bi-printer me-1"></i> In Báo Cáo
+    </button>
+</div>
+
+<!-- Date Filter Form -->
+<div class="card card-clean p-3 mb-4">
+    <div class="d-flex align-items-center gap-2 mb-3">
+        <small class="text-muted fw-semibold">Khoảng thời gian nhanh:</small>
+        <button type="button" class="btn btn-sm btn-outline-secondary py-0" onclick="setQuickDates('today')">Hôm nay</button>
+        <button type="button" class="btn btn-sm btn-outline-secondary py-0" onclick="setQuickDates('month')">Tháng này</button>
+        <button type="button" class="btn btn-sm btn-outline-secondary py-0" onclick="setQuickDates('year')">Năm nay</button>
+        <button type="button" class="btn btn-sm btn-outline-secondary py-0" onclick="setQuickDates('all')">Tất cả</button>
+    </div>
+
+    <form method="get" asp-controller="Report" asp-action="Index" class="row g-2 align-items-end" id="reportForm">
+        <div class="col-md-4">
+            <label class="form-label small fw-semibold">Từ ngày (StartDate)</label>
+            <input type="date" name="startDate" id="startDateInput" value="@startVal" class="form-control" required />
+        </div>
+        <div class="col-md-4">
+            <label class="form-label small fw-semibold">Đến ngày (EndDate)</label>
+            <input type="date" name="endDate" id="endDateInput" value="@endVal" class="form-control" required />
+        </div>
+        <div class="col-md-4 d-flex gap-2">
+            <button type="submit" class="btn btn-primary flex-grow-1">
+                <i class="bi bi-filter me-1"></i> Xem Báo Cáo
+            </button>
+            <a asp-controller="Report" asp-action="Index" class="btn btn-outline-secondary">Đặt lại</a>
+        </div>
+    </form>
+</div>
+
+<!-- Report Results -->
+@if (Model != null)
+{
+    <div class="alert alert-info py-2 small d-flex justify-content-between align-items-center mb-3">
+        <div>
+            Khoảng thời gian: <strong>@(Model.StartDate?.ToString("dd/MM/yyyy") ?? "-")</strong> đến <strong>@(Model.EndDate?.ToString("dd/MM/yyyy") ?? "-")</strong>
+            &bull; Sắp xếp: <strong>Giảm dần theo ngày tạo (CreatedDate DESC)</strong>
+        </div>
+        <span class="badge bg-primary fs-6">Tổng số: @Model.TotalNews bài viết</span>
+    </div>
+
+    <!-- Table -->
+    <div class="card card-clean">
+        <div class="table-responsive">
+            <table class="table table-clean table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th style="width: 80px;">Mã</th>
+                        <th>Tiêu Đề & Tóm Tắt</th>
+                        <th>Chuyên Mục</th>
+                        <th>Ngày Tạo</th>
+                        <th>Tác Giả</th>
+                        <th>Trạng Thái</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Articles == null || !Model.Articles.Any())
+                    {
+                        <tr>
+                            <td colspan="6" class="text-center py-4 text-muted">
+                                Không có bài viết nào được tạo trong khoảng thời gian đã chọn.
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var article in Model.Articles)
+                        {
+                            <tr>
+                                <td class="fw-bold text-muted">#@article.NewsArticleID</td>
+                                <td style="max-width: 280px;">
+                                    <div class="fw-semibold text-truncate">@article.NewsTitle</div>
+                                    <div class="text-muted small text-truncate">@article.Headline</div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-light text-dark border">
+                                        @(article.Category?.CategoryName ?? "Tổng hợp")
+                                    </span>
+                                </td>
+                                <td class="small text-muted">
+                                    @article.CreatedDate?.ToString("dd/MM/yyyy HH:mm")
+                                </td>
+                                <td class="small text-muted">
+                                    @(article.CreatedBy?.AccountName ?? "N/A")
+                                </td>
+                                <td>
+                                    @if (article.NewsStatus == true)
+                                    {
+                                        <span class="badge bg-success">Hoạt động</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">Vô hiệu</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <script>
+        function setQuickDates(preset) {
+            const today = new Date();
+            const formatDate = (d) => d.toISOString().split('T')[0];
+            const startInput = document.getElementById('startDateInput');
+            const endInput = document.getElementById('endDateInput');
+
+            if (preset === 'today') {
+                startInput.value = formatDate(today);
+                endInput.value = formatDate(today);
+            } else if (preset === 'month') {
+                const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+                startInput.value = formatDate(firstDayOfMonth);
+                endInput.value = formatDate(today);
+            } else if (preset === 'year') {
+                const firstDayOfYear = new Date(today.getFullYear(), 0, 1);
+                startInput.value = formatDate(firstDayOfYear);
+                endInput.value = formatDate(today);
+            } else if (preset === 'all') {
+                startInput.value = '2020-01-01';
+                endInput.value = formatDate(today);
+            }
+            document.getElementById('reportForm').submit();
+        }
+    </script>
+}

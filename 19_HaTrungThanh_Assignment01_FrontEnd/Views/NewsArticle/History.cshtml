@@ -1,0 +1,111 @@
+@model List<NewsArticleViewModel>
+@{
+    ViewData["Title"] = "Lịch Sử Bài Viết Của Tôi";
+}
+
+<!-- Page Header -->
+<div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+    <div>
+        <h3 class="fw-bold mb-1">Lịch Sử Bài Viết Của Tôi</h3>
+        <p class="text-muted mb-0 small">Danh sách các bài viết tin tức do chính bạn sáng tác</p>
+    </div>
+    <a asp-controller="NewsArticle" asp-action="Index" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-1"></i> Quay lại Quản lý
+    </a>
+</div>
+
+<!-- Table -->
+<div class="card card-clean">
+    <div class="table-responsive">
+        <table class="table table-clean table-hover align-middle">
+            <thead>
+                <tr>
+                    <th style="width: 80px;">Mã</th>
+                    <th>Tiêu Đề & Tóm Tắt</th>
+                    <th>Chuyên Mục</th>
+                    <th>Ngày Tạo</th>
+                    <th>Sửa Lần Cuối</th>
+                    <th>Trạng Thái</th>
+                    <th class="text-end" style="width: 120px;">Chi Tiết</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model == null || !Model.Any())
+                {
+                    <tr>
+                        <td colspan="7" class="text-center py-4 text-muted">
+                            Bạn chưa sáng tác bài viết nào.
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var article in Model)
+                    {
+                        <tr>
+                            <td class="fw-bold text-muted">#@article.NewsArticleID</td>
+                            <td style="max-width: 280px;">
+                                <div class="fw-semibold text-truncate">@article.NewsTitle</div>
+                                <div class="text-muted small text-truncate">@article.Headline</div>
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-dark border">
+                                    @(article.Category?.CategoryName ?? "Tổng hợp")
+                                </span>
+                            </td>
+                            <td class="small text-muted">
+                                @article.CreatedDate?.ToString("dd/MM/yyyy HH:mm")
+                            </td>
+                            <td class="small text-muted">
+                                @(article.ModifiedDate != null ? article.ModifiedDate?.ToString("dd/MM/yyyy HH:mm") : "-")
+                            </td>
+                            <td>
+                                @if (article.NewsStatus == true)
+                                {
+                                    <span class="badge bg-success">Đã xuất bản</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">Bản nháp</span>
+                                }
+                            </td>
+                            <td class="text-end">
+                                <button type="button" class="btn btn-sm btn-outline-primary"
+                                        data-bs-toggle="modal" data-bs-target="#viewModal_@article.NewsArticleID">
+                                    <i class="bi bi-eye"></i> Xem
+                                </button>
+                            </td>
+                        </tr>
+
+                        <!-- View Modal -->
+                        <div class="modal fade" id="viewModal_@article.NewsArticleID" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">@article.NewsTitle</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="small text-muted mb-3 pb-2 border-bottom d-flex justify-content-between">
+                                            <span>Chuyên mục: <strong>@(article.Category?.CategoryName ?? "Chuyên mục")</strong></span>
+                                            <span>Ngày tạo: <strong>@article.CreatedDate?.ToString("dd/MM/yyyy HH:mm")</strong></span>
+                                        </div>
+                                        <div class="fw-bold mb-3 text-secondary">
+                                            @article.Headline
+                                        </div>
+                                        <div style="white-space: pre-line; line-height: 1.7;">
+                                            @article.NewsContent
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Đóng</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
