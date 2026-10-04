@@ -110,52 +110,58 @@
                                 </form>
                             </td>
                         </tr>
-
-                        <!-- Edit Modal -->
-                        <div class="modal fade" id="editModal_@acc.AccountID" tabindex="-1" aria-hidden="true">
-                            <div class="modal-dialog modal-dialog-centered">
-                                <div class="modal-content">
-                                    <form method="post" asp-controller="Account" asp-action="Edit" asp-route-id="@acc.AccountID">
-                                        @Html.AntiForgeryToken()
-                                        <div class="modal-header">
-                                            <h5 class="modal-title">Chỉnh Sửa Tài Khoản #@acc.AccountID</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
-                                        </div>
-                                        <div class="modal-body">
-                                            <div class="mb-3">
-                                                <label class="form-label small fw-semibold">Họ và Tên</label>
-                                                <input type="text" name="AccountName" value="@acc.AccountName" class="form-control" required />
-                                            </div>
-                                            <div class="mb-3">
-                                                <label class="form-label small fw-semibold">Địa Chỉ Email</label>
-                                                <input type="email" name="AccountEmail" value="@acc.AccountEmail" class="form-control" required />
-                                            </div>
-                                            <div class="mb-3">
-                                                <label class="form-label small fw-semibold">Vai Trò</label>
-                                                <select name="AccountRole" class="form-select">
-                                                    <option value="1" selected="@(acc.AccountRole == 1)">Nhân viên (Staff)</option>
-                                                    <option value="2" selected="@(acc.AccountRole == 2)">Giảng viên (Lecturer)</option>
-                                                </select>
-                                            </div>
-                                            <div class="mb-3">
-                                                <label class="form-label small fw-semibold">Mật Khẩu</label>
-                                                <input type="password" name="AccountPassword" value="@acc.AccountPassword" class="form-control" required />
-                                            </div>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Hủy bỏ</button>
-                                            <button type="submit" class="btn btn-primary btn-sm">Lưu Thay Đổi</button>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
                     }
                 }
             </tbody>
         </table>
     </div>
 </div>
+
+<!-- Edit Modals (Outside table) -->
+@if (Model != null && Model.Any())
+{
+    foreach (var acc in Model)
+    {
+        <div class="modal fade" id="editModal_@acc.AccountID" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <form method="post" asp-controller="Account" asp-action="Edit" asp-route-id="@acc.AccountID">
+                        @Html.AntiForgeryToken()
+                        <div class="modal-header">
+                            <h5 class="modal-title">Chỉnh Sửa Tài Khoản #@acc.AccountID</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold">Họ và Tên</label>
+                                <input type="text" name="AccountName" value="@acc.AccountName" class="form-control" required />
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold">Địa Chỉ Email</label>
+                                <input type="email" name="AccountEmail" value="@acc.AccountEmail" class="form-control" required />
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold">Vai Trò</label>
+                                <select name="AccountRole" class="form-select">
+                                    <option value="1" selected="@(acc.AccountRole == 1)">Nhân viên (Staff)</option>
+                                    <option value="2" selected="@(acc.AccountRole == 2)">Giảng viên (Lecturer)</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold">Mật Khẩu</label>
+                                <input type="password" name="AccountPassword" value="@acc.AccountPassword" class="form-control" required />
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Hủy bỏ</button>
+                            <button type="submit" class="btn btn-primary btn-sm">Lưu Thay Đổi</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    }
+}
 
 <!-- Create Modal -->
 <div class="modal fade" id="createAccountModal" tabindex="-1" aria-hidden="true">

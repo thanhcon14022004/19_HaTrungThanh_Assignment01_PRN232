@@ -63,9 +63,8 @@ namespace _19_HaTrungThanh_Assignment01_BackEnd.DTOs
 
     public class NewsArticleCreateUpdateDto
     {
-        [Required(ErrorMessage = "Article ID is required.")]
         [StringLength(20, ErrorMessage = "Article ID cannot exceed 20 characters.")]
-        public string NewsArticleID { get; set; } = string.Empty;
+        public string? NewsArticleID { get; set; }
 
         [StringLength(400, ErrorMessage = "Title cannot exceed 400 characters.")]
         public string? NewsTitle { get; set; }

@@ -76,36 +76,42 @@
                                 </button>
                             </td>
                         </tr>
-
-                        <!-- View Modal -->
-                        <div class="modal fade" id="viewModal_@article.NewsArticleID" tabindex="-1" aria-hidden="true">
-                            <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title">@article.NewsTitle</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <div class="small text-muted mb-3 pb-2 border-bottom d-flex justify-content-between">
-                                            <span>Chuyên mục: <strong>@(article.Category?.CategoryName ?? "Chuyên mục")</strong></span>
-                                            <span>Ngày tạo: <strong>@article.CreatedDate?.ToString("dd/MM/yyyy HH:mm")</strong></span>
-                                        </div>
-                                        <div class="fw-bold mb-3 text-secondary">
-                                            @article.Headline
-                                        </div>
-                                        <div style="white-space: pre-line; line-height: 1.7;">
-                                            @article.NewsContent
-                                        </div>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Đóng</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
                     }
                 }
             </tbody>
         </table>
     </div>
 </div>
+
+<!-- View Modals (Outside table) -->
+@if (Model != null && Model.Any())
+{
+    foreach (var article in Model)
+    {
+        <div class="modal fade" id="viewModal_@article.NewsArticleID" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">@article.NewsTitle</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="small text-muted mb-3 pb-2 border-bottom d-flex justify-content-between">
+                            <span>Chuyên mục: <strong>@(article.Category?.CategoryName ?? "Chuyên mục")</strong></span>
+                            <span>Ngày tạo: <strong>@article.CreatedDate?.ToString("dd/MM/yyyy HH:mm")</strong></span>
+                        </div>
+                        <div class="fw-bold mb-3 text-secondary">
+                            @article.Headline
+                        </div>
+                        <div style="white-space: pre-line; line-height: 1.7;">
+                            @article.NewsContent
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Đóng</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+}

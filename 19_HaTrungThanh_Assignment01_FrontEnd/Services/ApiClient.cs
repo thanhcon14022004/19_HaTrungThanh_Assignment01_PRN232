@@ -126,7 +126,7 @@ namespace _19_HaTrungThanh_Assignment01_FrontEnd.Services
             {
                 var payload = new
                 {
-                    model.NewsArticleID,
+                    NewsArticleID = string.IsNullOrWhiteSpace(model.NewsArticleID) ? id : model.NewsArticleID,
                     model.NewsTitle,
                     model.Headline,
                     model.NewsContent,
@@ -134,15 +134,41 @@ namespace _19_HaTrungThanh_Assignment01_FrontEnd.Services
                     model.CategoryID,
                     model.NewsStatus,
                     model.UpdatedByID,
-                    TagIds = model.SelectedTagIds
+                    TagIds = model.SelectedTagIds ?? new List<int>()
                 };
 
                 var response = await _client.PutAsJsonAsync($"newsarticles/{id}", payload);
                 if (response.IsSuccessStatusCode)
                     return (true, "News article updated successfully.");
 
-                var err = await response.Content.ReadFromJsonAsync<JsonElement>(_jsonOptions);
-                return (false, err.TryGetProperty("message", out var m) ? m.GetString() ?? "Failed" : "Failed");
+                var raw = await response.Content.ReadAsStringAsync();
+                try
+                {
+                    var doc = JsonDocument.Parse(raw);
+                    var root = doc.RootElement;
+                    if (root.TryGetProperty("message", out var m))
+                        return (false, m.GetString() ?? "Failed");
+                    if (root.TryGetProperty("errors", out var errors) && errors.ValueKind == JsonValueKind.Object)
+                    {
+                        var errList = new List<string>();
+                        foreach (var prop in errors.EnumerateObject())
+                        {
+                            foreach (var errItem in prop.Value.EnumerateArray())
+                            {
+                                errList.Add(errItem.GetString() ?? "");
+                            }
+                        }
+                        if (errList.Any()) return (false, string.Join("; ", errList));
+                    }
+                    if (root.TryGetProperty("title", out var title))
+                        return (false, title.GetString() ?? "Failed");
+                }
+                catch
+                {
+                    // ignored
+                }
+
+                return (false, string.IsNullOrWhiteSpace(raw) ? "Cập nhật bài viết thất bại." : raw);
             }
             catch (Exception ex)
             {

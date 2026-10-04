@@ -100,6 +100,11 @@ namespace _19_HaTrungThanh_Assignment01_BackEnd.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateNewsArticle(string id, [FromBody] NewsArticleCreateUpdateDto dto)
         {
+            if (string.IsNullOrWhiteSpace(dto.NewsArticleID))
+            {
+                dto.NewsArticleID = id;
+            }
+
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);

@@ -79,6 +79,7 @@ namespace _19_HaTrungThanh_Assignment01_FrontEnd.Controllers
             if (!IsAuthorized()) return RedirectToAction("Index", "Login");
 
             short staffId = short.TryParse(HttpContext.Session.GetString("AccountID"), out var idVal) ? idVal : (short)1;
+            model.NewsArticleID = id;
             model.UpdatedByID = staffId;
             model.NewsStatus = Request.Form["NewsStatus"].Any(v => string.Equals(v, "true", StringComparison.OrdinalIgnoreCase));
 
